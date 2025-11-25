@@ -1,80 +1,53 @@
-import { useFocusEffect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Button, FlatList, StyleSheet, Text, View } from "react-native";
-import { clearPayments, loadPayments } from "../utils/storage";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { saveBalance } from "../utils/storage";
 
-export default function HomeScreen() {
-  const [payments, setPayments] = useState<any[]>([]);
+export default function BalanceScreen() {
   const router = useRouter();
+  const [input, setInput] = useState("");
 
-  useFocusEffect(() => {
-    loadPayments().then(setPayments);
-  });
-
-  const total = payments.reduce((sum, p) => sum + p.amount, 0);
-  const formattedTotal = total.toLocaleString("mk-MK");
-
-  const resetPayments = async () => {
-    await clearPayments();
-    setPayments([]);
-  };
-
-  const confirmReset = () => {
-    Alert.alert(
-      "Потврда",
-      "Дали сте сигурни дека сакате да ги избришете сите плаќања?",
-      [
-        { text: "Откажи", style: "cancel" },
-        { text: "Ресетирај", style: "destructive", onPress: resetPayments },
-      ]
-    );
+  const handleSave = async () => {
+    const value = parseFloat(input);
+    if (!isNaN(value) && value > 0) {
+      await saveBalance(value); // store balance in AsyncStorage
+      router.replace("/balance"); // go to HomeScreen after saving
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.total}>Вкупно Потрошено: {formattedTotal} ден.</Text>
-
-      <FlatList
-        data={payments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.description}</Text>
-            <Text>{item.amount.toLocaleString("mk-MK")} ден.</Text>
-          </View>
-        )}
+      <Text style={styles.label}>Внеси Состојба на Картичка</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        value={input}
+        onChangeText={setInput}
+        placeholder="Пример: 10000"
       />
-
-      <View style={styles.buttonGroup}>
-        <Button title="Додади Плаќање" onPress={() => router.push("/add")} />
-        <Button
-          title="Ресетирај Сите Плаќања"
-          color="red"
-          onPress={confirmReset}
-        />
-      </View>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
+        <Text style={styles.buttonText}>Зачувај</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 20,
-  },
-  total: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  item: {
-    padding: 12,
+  container: { flex: 1, justifyContent: "center", padding: 20 },
+  label: { fontSize: 18, marginBottom: 10 },
+  input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    marginBottom: 8,
-    borderRadius: 6,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
   },
-  buttonGroup: {
-    gap: 10,
-  },
+  button: { backgroundColor: "#4CAF50", padding: 15, borderRadius: 8 },
+  buttonText: { color: "#fff", textAlign: "center", fontWeight: "600" },
 });

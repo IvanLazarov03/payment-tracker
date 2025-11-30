@@ -34,3 +34,8 @@ export async function loadPayments() {
 export async function clearPayments() {
   await AsyncStorage.removeItem(PAYMENTS_KEY);
 }
+
+export const getBalance = async () => {
+  const balance = await AsyncStorage.getItem(BALANCE_KEY);
+  return balance ? JSON.parse(balance) : null;
+};

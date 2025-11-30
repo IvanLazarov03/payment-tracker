@@ -11,15 +11,15 @@ import {
 import { loadPayments, savePayments } from "../../utils/storage";
 
 export default function EditPaymentScreen() {
-  const router = useRouter();
+  const router = useRouter(); //se koristi za navigacija pomegju razlicnite ekrani
   const { id } = useLocalSearchParams();
 
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState(""); //state za opis na plakanjeto
+  const [amount, setAmount] = useState(""); //state za vrednosta na plakanjeto
 
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]); //prvicen state za site plakanja(prazna niza)
 
-  // Load payment info
+  // se vcituva postoeckoto plakanje dokolku postoi
   useEffect(() => {
     const load = async () => {
       const stored = await loadPayments();
@@ -40,7 +40,7 @@ export default function EditPaymentScreen() {
     load();
   }, [id]);
 
-  // Save changes
+  // zacuvuvanje na promenite na plakanje
   const save = async () => {
     if (!description || !amount) {
       Alert.alert("Грешка", "Пополнете ги сите полиња.");
@@ -64,7 +64,7 @@ export default function EditPaymentScreen() {
     ]);
   };
 
-  // Delete payment
+  // brisenje na plakanje
   const remove = () => {
     Alert.alert("Бришење", "Дали сте сигурни?", [
       { text: "Откажи", style: "cancel" },

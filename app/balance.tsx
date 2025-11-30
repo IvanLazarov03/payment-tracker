@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const [payments, setPayments] = useState<any[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
 
-  // Load data whenever screen regains focus
+  // Se vcituva balansot i plakanjata koi se vneseni
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
@@ -40,15 +40,16 @@ export default function HomeScreen() {
     }, [])
   );
 
-  // Total spent
-  const totalSpent = payments.reduce((sum, p) => sum + p.amount, 0);
+  // Vkupno potroseno
+  const totalSpent = payments.reduce((sum, p) => sum + p.amount, 0); //ovde se presmetuva vkupnata potrsuvacka a 0 e default vrednost
 
-  // Remaining balance calculation
+  // Preostanato saldo
   const remaining = balance !== null ? balance - totalSpent : 0;
+  //Formatiranje na sumata
   const formattedRemaining = remaining.toLocaleString("mk-MK");
   const formattedSpent = totalSpent.toLocaleString("mk-MK");
 
-  // Reset everything (balance + payments)
+  // Funkcija za resetiranje
   const resetAll = async () => {
     await clearPayments();
     await clearBalance();
@@ -57,6 +58,7 @@ export default function HomeScreen() {
     router.replace("/");
   };
 
+  //Funkcija za inicijalizacija na resetiranje
   const confirmReset = () => {
     Alert.alert(
       "Потврда",

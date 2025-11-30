@@ -1,14 +1,15 @@
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
+  //Ovde go definirame layout na apklikacijata so Stack Navigator
   return (
     <Stack>
-      <Stack.Screen name="index" options={{ title: "Плаќања" }} />
+      <Stack.Screen name="index" options={{ title: "Внеси Состојба" }} />
 
       <Stack.Screen
         name="balance"
         options={{
-          title: "Внеси Состојба",
+          title: "Состојба",
         }}
       />
 
@@ -16,6 +17,7 @@ export default function RootLayout() {
         name="add"
         options={{
           title: "Додади Плаќање",
+          //so presentation go definirame nacinot na koj sakame da se prikaze noviot ekran
           presentation: "formSheet",
           sheetAllowedDetents: [0.7],
         }}

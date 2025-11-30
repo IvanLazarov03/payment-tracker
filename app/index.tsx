@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,17 +7,29 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { saveBalance } from "../utils/storage";
+import { getBalance, saveBalance } from "../utils/storage";
 
 export default function BalanceScreen() {
   const router = useRouter();
   const [input, setInput] = useState("");
 
+  useEffect(() => {
+    const checkBalance = async () => {
+      const storedBalance = await getBalance();
+      if (storedBalance !== null) {
+        //proveruvame dali imame socuvan balans
+        router.replace("/balance"); //ako imame se otvara /balance  ekranot ako nema ostanuvame na pocetniot ekran
+      }
+    };
+
+    checkBalance();
+  }, []);
+
   const handleSave = async () => {
     const value = parseFloat(input);
     if (!isNaN(value) && value > 0) {
-      await saveBalance(value); // store balance in AsyncStorage
-      router.replace("/balance"); // go to HomeScreen after saving
+      await saveBalance(value); // ovde se zacuva balansot
+      router.replace("/balance"); // se odi /balance ekranot po zacuvuvanjeto
     }
   };
 
@@ -31,6 +43,7 @@ export default function BalanceScreen() {
         onChangeText={setInput}
         placeholder="Пример: 10000"
       />
+
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Зачувај</Text>
       </TouchableOpacity>

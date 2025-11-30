@@ -25,5 +25,8 @@ It allows you to add payments, calculate your current balance, and store everyth
 - TypeScript  
 
 ---
+### 📥 Download the app
+[⬇️ Download APK](https://expo.dev/accounts/ivanlazarov03/projects/payment-tracker/builds/98780e84-eb51-4a76-9c41-7ff0f4b75250)
+
 
 

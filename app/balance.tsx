@@ -9,17 +9,15 @@ import {
   View,
 } from "react-native";
 
-import {
-  clearBalance,
-  clearPayments,
-  loadBalance,
-  loadPayments,
-} from "../utils/storage";
+import { useBalanceStorage, usePaymentsStorage } from "../utils/storage";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [payments, setPayments] = useState<any[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
+
+  const { loadBalance, clearBalance } = useBalanceStorage();
+  const { loadPayments, clearPayments } = usePaymentsStorage();
 
   // Se vcituva balansot i plakanjata koi se vneseni
   useFocusEffect(

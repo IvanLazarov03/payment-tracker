@@ -1,41 +1,87 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const BALANCE_KEY = "card_balance";
-const PAYMENTS_KEY = "payments";
+// utils/storage.tsx
+import { useSQLiteContext } from "expo-sqlite";
 
 // -----------------------------
 // 🔹 BALANCE
 // -----------------------------
-export async function saveBalance(amount: number) {
-  await AsyncStorage.setItem(BALANCE_KEY, JSON.stringify(amount));
-}
+export function useBalanceStorage() {
+  const db = useSQLiteContext();
 
-export async function loadBalance(): Promise<number> {
-  const data = await AsyncStorage.getItem(BALANCE_KEY);
-  return data ? JSON.parse(data) : 0; // default = 0
-}
+  const saveBalance = async (amount: number) => {
+    // Only one balance row, overwrite each time
+    await db.runAsync("DELETE FROM balance");
+    await db.runAsync("INSERT INTO balance (id, value) VALUES (?, ?)", [
+      1,
+      amount,
+    ]);
+  };
 
-export async function clearBalance() {
-  await AsyncStorage.removeItem(BALANCE_KEY);
+  const loadBalance = async (): Promise<number> => {
+    const row = await db.getFirstAsync<{ value: number }>(
+      "SELECT value FROM balance WHERE id = 1"
+    );
+    return row ? row.value : 0; // default = 0
+  };
+
+  const getBalance = async (): Promise<number | null> => {
+    const row = await db.getFirstAsync<{ value: number }>(
+      "SELECT value FROM balance WHERE id = 1"
+    );
+    return row ? row.value : null; // distinguish "no balance" vs "exists"
+  };
+
+  const clearBalance = async () => {
+    await db.runAsync("DELETE FROM balance");
+  };
+
+  return { saveBalance, loadBalance, getBalance, clearBalance };
 }
 
 // -----------------------------
 // 🔹 PAYMENTS
 // -----------------------------
-export async function savePayments(payments: any[]) {
-  await AsyncStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
-}
+export function usePaymentsStorage() {
+  const db = useSQLiteContext();
 
-export async function loadPayments() {
-  const data = await AsyncStorage.getItem(PAYMENTS_KEY);
-  return data ? JSON.parse(data) : [];
-}
+  const savePayment = async (description: string, amount: number) => {
+    await db.runAsync(
+      "INSERT INTO payments (description, amount) VALUES (?, ?)",
+      [description, amount]
+    );
+  };
 
-export async function clearPayments() {
-  await AsyncStorage.removeItem(PAYMENTS_KEY);
-}
+  const loadPayments = async () => {
+    return await db.getAllAsync<{
+      id: number;
+      description: string;
+      amount: number;
+    }>("SELECT * FROM payments ORDER BY id DESC");
+  };
 
-export const getBalance = async () => {
-  const balance = await AsyncStorage.getItem(BALANCE_KEY);
-  return balance ? JSON.parse(balance) : null;
-};
+  const clearPayments = async () => {
+    await db.runAsync("DELETE FROM payments");
+  };
+
+  const updatePayment = async (
+    id: number,
+    description: string,
+    amount: number
+  ) => {
+    await db.runAsync(
+      "UPDATE payments SET description = ?, amount = ? WHERE id = ?",
+      [description, amount, id]
+    );
+  };
+
+  const deletePayment = async (id: number) => {
+    await db.runAsync("DELETE FROM payments WHERE id = ?", [id]);
+  };
+
+  return {
+    savePayment,
+    loadPayments,
+    clearPayments,
+    updatePayment,
+    deletePayment,
+  };
+}

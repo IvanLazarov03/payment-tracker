@@ -8,24 +8,25 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { loadPayments, savePayments } from "../../utils/storage";
+import { useBalanceStorage, usePaymentsStorage } from "../../utils/storage";
 
 export default function EditPaymentScreen() {
-  const router = useRouter(); //se koristi za navigacija pomegju razlicnite ekrani
+  const router = useRouter();
   const { id } = useLocalSearchParams();
 
-  const [description, setDescription] = useState(""); //state za opis na plakanjeto
-  const [amount, setAmount] = useState(""); //state za vrednosta na plakanjeto
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
 
-  const [payments, setPayments] = useState<any[]>([]); //prvicen state za site plakanja(prazna niza)
+  // ✅ Call hook at top-level
+  const { loadBalance } = useBalanceStorage();
+  const { loadPayments, updatePayment, deletePayment } = usePaymentsStorage();
 
-  // se vcituva postoeckoto plakanje dokolku postoi
   useEffect(() => {
     const load = async () => {
       const stored = await loadPayments();
-      setPayments(stored);
 
-      const payment = stored.find((p: any) => p.id === id);
+      // id from params is string; match consistently
+      const payment = stored.find((p: any) => String(p.id) === String(id));
 
       if (!payment) {
         Alert.alert("Грешка", "Не постои ова плаќање.");
@@ -33,16 +34,15 @@ export default function EditPaymentScreen() {
         return;
       }
 
-      setDescription(payment.description);
+      setDescription(payment.description ?? "");
       setAmount(String(payment.amount));
     };
 
     load();
   }, [id]);
 
-  // zacuvuvanje na promenite na plakanje
   const save = async () => {
-    if (!description || !amount) {
+    if (!amount) {
       Alert.alert("Грешка", "Пополнете ги сите полиња.");
       return;
     }
@@ -53,18 +53,17 @@ export default function EditPaymentScreen() {
       return;
     }
 
-    const updated = payments.map((p) =>
-      p.id === id ? { ...p, description, amount: num } : p
-    );
+    // ✅ Optional description fallback handled here
+    const descToSave = description.trim() || "Нема опис на плакање";
 
-    await savePayments(updated);
+    // ✅ Update single row, not whole array
+    await updatePayment(Number(id), descToSave, num);
 
     Alert.alert("Успешно", "Плаќањето е ажурирано.", [
       { text: "ОК", onPress: () => router.replace("/balance") },
     ]);
   };
 
-  // brisenje na plakanje
   const remove = () => {
     Alert.alert("Бришење", "Дали сте сигурни?", [
       { text: "Откажи", style: "cancel" },
@@ -72,8 +71,8 @@ export default function EditPaymentScreen() {
         text: "Избриши",
         style: "destructive",
         onPress: async () => {
-          const filtered = payments.filter((p) => p.id !== id);
-          await savePayments(filtered);
+          // ✅ Delete single row
+          await deletePayment(Number(id));
           router.replace("/balance");
         },
       },
@@ -124,12 +123,7 @@ export default function EditPaymentScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 15,
-    justifyContent: "center",
-  },
+  container: { flex: 1, padding: 20, gap: 15, justifyContent: "center" },
   title: {
     fontSize: 24,
     fontWeight: "700",
@@ -144,19 +138,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: "#FFF",
   },
-  button: {
-    padding: 15,
-    borderRadius: 12,
-  },
-  saveButton: {
-    backgroundColor: "#4CAF50",
-  },
-  deleteButton: {
-    backgroundColor: "#D32F2F",
-  },
-  backButton: {
-    backgroundColor: "#607D8B",
-  },
+  button: { padding: 15, borderRadius: 12 },
+  saveButton: { backgroundColor: "#4CAF50" },
+  deleteButton: { backgroundColor: "#D32F2F" },
+  backButton: { backgroundColor: "#607D8B" },
   buttonText: {
     color: "#FFF",
     textAlign: "center",

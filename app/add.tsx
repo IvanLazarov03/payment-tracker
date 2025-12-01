@@ -2,12 +2,15 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Button, StyleSheet, TextInput, View } from "react-native";
 import uuid from "react-native-uuid";
-import { loadBalance, loadPayments, savePayments } from "../utils/storage";
+import { useBalanceStorage, usePaymentsStorage } from "../utils/storage";
 
 export default function AddPaymentScreen() {
   const router = useRouter();
   const [amount, setAmount] = useState(""); //state za iznos
   const [desc, setDesc] = useState(""); //state za opis
+
+  const { loadPayments, updatePayment, savePayment } = usePaymentsStorage(); //gi inicilajizirame plakjanjata dokolku gi ima
+  const { loadBalance } = useBalanceStorage(); //go inicilazirame balansot za da moze da go koristime vo handleAdd
 
   const handleAdd = async () => {
     if (!amount) return;
@@ -41,7 +44,7 @@ export default function AddPaymentScreen() {
       date: new Date().toISOString(),
     };
 
-    await savePayments([...payments, newPayment]); //se zacuvuva plakanjeto
+    await savePayment(newPayment.description, newPayment.amount);
     router.back();
   };
 

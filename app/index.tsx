@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getBalance, saveBalance } from "../utils/storage";
+import { useBalanceStorage } from "../utils/storage";
 
 export default function BalanceScreen() {
   const router = useRouter();
   const [input, setInput] = useState("");
+  const { getBalance, saveBalance, loadBalance } = useBalanceStorage();
 
   useEffect(() => {
     const checkBalance = async () => {

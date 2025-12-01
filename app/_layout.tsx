@@ -3,6 +3,8 @@ import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 
 export default function RootLayout() {
+  //ovde ja kreairame bazata ako ne postoi
+  //tuka kreirame dve tabeli balance i payments
   const createDbIfNeeded = async (db: SQLiteDatabase) => {
     await db.execAsync(`
     CREATE TABLE IF NOT EXISTS balance (

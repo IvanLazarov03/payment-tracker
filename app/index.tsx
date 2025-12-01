@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useBalanceStorage } from "../utils/storage";
+import { useBalanceStorage } from "../utils/storage"; //za razlika od async storage prvo vrsime import na edna glavna funkcija
 
 export default function BalanceScreen() {
   const router = useRouter();
   const [input, setInput] = useState("");
-  const { getBalance, saveBalance, loadBalance } = useBalanceStorage();
+  const { getBalance, saveBalance, loadBalance } = useBalanceStorage(); //potoa vaka vrsime import na ostanatite funkcii
 
   useEffect(() => {
     const checkBalance = async () => {
